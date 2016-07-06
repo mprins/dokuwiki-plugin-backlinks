@@ -91,7 +91,8 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      */
     function render($mode, Doku_Renderer $renderer, $data) {
         global $lang;
-
+        global $conf;
+ 
         if($mode == 'xhtml'){
             $renderer->info['cache'] = false;
 
@@ -123,15 +124,18 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
             if(!empty($backlinks)) {
 
                 $renderer->doc .= '<ul class="idx">';
-
+                $i=0; $more=false;
                 foreach($backlinks as $backlink){
+                    if(++$i > $this->getConf('number')) {$more=true;break;}
                     $name = p_get_metadata($backlink, 'title');
                     if(empty($name)) $name = $backlink;
                     $renderer->doc .= '<li><div class="li">';
                     $renderer->doc .= html_wikilink(':'.$backlink, $name);
                     $renderer->doc .= '</div></li>' . DW_LF;
                 }
-
+                if ($more) {
+                    $renderer->doc .= tpl_actionlink('backlink', '','',count($backlinks)-$i.$this->getLang('more'), true);
+                }
                 $renderer->doc .= '</ul>' . DW_LF;
             } else {
                 $renderer->doc .= "<strong>Plugin Backlinks: " . $lang['nothingfound'] . "</strong>" . DW_LF;
