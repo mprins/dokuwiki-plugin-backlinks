@@ -28,12 +28,12 @@ class syntax_include_plugin_backlinks_test extends DokuWikiTest {
     /**
      * copy data.
      */
-    public static function setUpBeforeClass(){
+    public static function setUpBeforeClass() {
         parent::setUpBeforeClass();
         global $conf;
         $conf['allowdebug'] = 1;
 
-        TestUtils::rcopy(TMP_DIR, dirname(__FILE__) . '/data/');
+        TestUtils::rcopy(TMP_DIR, dirname(__FILE__).'/data/');
 
         dbglog("\nset up class syntax_plugin_backlinks_test");
     }
@@ -66,7 +66,7 @@ class syntax_include_plugin_backlinks_test extends DokuWikiTest {
 
         global $conf;
         // try to get the debug log after running the test, print and clear
-        if($conf['allowdebug']) {
+        if ($conf['allowdebug']) {
             print "\n";
             readfile(DOKU_TMP_DATA.'cache/debug.log');
             unlink(DOKU_TMP_DATA.'cache/debug.log');
@@ -88,7 +88,7 @@ class syntax_include_plugin_backlinks_test extends DokuWikiTest {
                             1,
                             pq('#plugin__backlinks', $doc)->length,
                             'There should be one backlinks element'
-                           );
+                            );
 
         $wikilinks = pq('#plugin__backlinks ul li', $doc);
         dbglog($wikilinks->text(), 'found backlinks');
@@ -96,14 +96,14 @@ class syntax_include_plugin_backlinks_test extends DokuWikiTest {
                             1,
                             $wikilinks->contents()->length,
                             'There should be 1 backlink'
-                           );
+                            );
 
-        $lastlink = pq('a:last',$wikilinks);
-        dbglog($lastlink->text(),"last backlink");
+        $lastlink = pq('a:last', $wikilinks);
+        dbglog($lastlink->text(), "last backlink");
         $this->assertEquals(
                             $lastlink->text(),
                             'An included link to Bob Ross',
                             'The last backlink should be "An included link to Bob Ross"'
-                           );
+                            );
     }
 }
