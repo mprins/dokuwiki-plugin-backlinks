@@ -13,19 +13,9 @@
  * @author  Michael Klier <chi@chimeric.de>
  * @author  Mark C. Prins <mprins@users.sf.net>
  */
-if (!defined('DOKU_INC')) {
-    die();
-}
 
-if (!defined('DOKU_PLUGIN')) {
-    define('DOKU_PLUGIN', DOKU_INC.'lib/plugins/');
-}
-if (!defined('DW_LF')) {
-    define('DW_LF', "\n");
-}
-
-require_once(DOKU_PLUGIN.'syntax.php');
-require_once(DOKU_INC.'inc/parserutils.php');
+// must be run within Dokuwiki
+if (!defined('DOKU_INC')) die();
 
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
@@ -63,29 +53,26 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      * @see DokuWiki_Syntax_Plugin::handle()
      */
     function handle($match, $state, $pos, Doku_Handler $handler) {
-        // Take the id of the source
-        // It can be a rendering of a sidebar
         global $INFO;
         global $ID;
-        $id = $ID;
-        // If it's a sidebar, get the original id.
-        if ($INFO != null) {
-            $id = $INFO['id'];
-        }
 
         // strip {{backlinks> from start and }} from end
         $match = substr($match, 12, -2);
 
-        if (strstr($match, "#")) {
-            $includeNS = substr(strstr($match, "#", FALSE), 1);
-            $match = strstr($match, "#", TRUE);
-        }
+        // Take the id of the source
+        // It can be a rendering of a sidebar
+	if ($ID == $INFO['id']) {
+	    if (strstr($match, "#")) {
+		$includeNS = substr(strstr($match, "#", FALSE), 1);
+		$match = strstr($match, "#", TRUE);
+	    }
 
-        $match = ($match == '.') ? $id : $match;
+	    $match = ($match == '.') ? $id : $match;
 
-        if (strstr($match, ".:")) {
-            resolve_pageid(getNS($id), $match, $exists);
-        }
+	    if (strstr($match, ".:")) {
+		resolve_pageid(getNS($id), $match, $exists);
+	    }
+	}
 
         return (array($match, $includeNS));
     }
@@ -96,16 +83,22 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      */
     function render($mode, Doku_Renderer $renderer, $data) {
         global $lang;
+	global $ID;
+	global $INFO;
 
-        if ($mode == 'xhtml') {
+	if ($mode == 'xhtml') {
             $renderer->info['cache'] = false;
 
             @require_once(DOKU_INC.'inc/fulltext.php');
-            $backlinks = ft_backlinks($data[0]);
+	    $page_id = $data[0];
+	    if($page_id == '.') {
+		$page_id = $INFO['id'];
+	    }
+            $backlinks = ft_backlinks($page_id);
 
-            dbglog($backlinks, "backlinks: all backlinks to: $data[0]");
+            dbglog($backlinks, "backlinks: all backlinks to: $page_id");
 
-            $renderer->doc .= '<div id="plugin__backlinks">'.DW_LF;
+            $renderer->doc .= '<div id="plugin__backlinks">'.PHP_EOL;
 
             $filterNS = $data[1];
             if (!empty($backlinks) && !empty($filterNS)) {
@@ -136,18 +129,19 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
                     }
                     $renderer->doc .= '<li><div class="li">';
                     $renderer->doc .= html_wikilink(':'.$backlink, $name);
-                    $renderer->doc .= '</div></li>'.DW_LF;
+                    $renderer->doc .= '</div></li>'.PHP_EOL;
                 }
 
-                $renderer->doc .= '</ul>'.DW_LF;
+                $renderer->doc .= '</ul>'.PHP_EOL;
             } else {
-                $renderer->doc .= "<strong>Plugin Backlinks: ".$lang['nothingfound']."</strong>".DW_LF;
+                $renderer->doc .= "<strong>Plugin Backlinks: ".$lang['nothingfound']."</strong>".PHP_EOL;
             }
 
-            $renderer->doc .= '</div>'.DW_LF;
+            $renderer->doc .= '</div>'.PHP_EOL;
 
             return true;
         }
         return false;
     }
 }
+// vim:ts=4:sw=4:et:
