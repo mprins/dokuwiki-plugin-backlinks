@@ -63,28 +63,12 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      * @see DokuWiki_Syntax_Plugin::handle()
      */
     function handle($match, $state, $pos, Doku_Handler $handler) {
-        // Take the id of the source
-        // It can be a rendering of a sidebar
-        global $INFO;
-        global $ID;
-        $id = $ID;
-        // If it's a sidebar, get the original id.
-        if ($INFO != null) {
-            $id = $INFO['id'];
-        }
-
         // strip {{backlinks> from start and }} from end
         $match = substr($match, 12, -2);
 
         if (strstr($match, "#")) {
             $includeNS = substr(strstr($match, "#", FALSE), 1);
             $match = strstr($match, "#", TRUE);
-        }
-
-        $match = ($match == '.') ? $id : $match;
-
-        if (strstr($match, ".:")) {
-            resolve_pageid(getNS($id), $match, $exists);
         }
 
         return (array($match, $includeNS));
@@ -96,14 +80,30 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      */
     function render($mode, Doku_Renderer $renderer, $data) {
         global $lang;
+        global $INFO;
+        global $ID;
 
         if ($mode == 'xhtml') {
+            // dbglog($data, "renderer init");
+            $id = $ID;
+
+            // If it's a sidebar, get the original id.
+            if ($INFO != null) {
+                $id = $INFO['id'];
+            }
+	    $match = $data[0];
+	    $match = ($match == '.') ? $id : $match;
+            if (strstr($match, ".:")) {
+                resolve_pageid(getNS($id), $match, $exists);
+	    }
+            // dbglog($match, "renderer final");
+
             $renderer->info['cache'] = false;
 
             @require_once(DOKU_INC.'inc/fulltext.php');
-            $backlinks = ft_backlinks($data[0]);
+            $backlinks = ft_backlinks($match);
 
-            dbglog($backlinks, "backlinks: all backlinks to: $data[0]");
+            dbglog($backlinks, "backlinks: all backlinks to: $match");
 
             $renderer->doc .= '<div id="plugin__backlinks">'.DW_LF;
 
