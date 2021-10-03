@@ -12,6 +12,6 @@ jobs:
       - uses: dessant/lock-threads@v3
         with:
           github-token: ${{ github.token }}
-          issue-lock-inactive-days: '90'
-          issue-exclude-labels: 'enhancement, pull request accepted'
-          pr-lock-inactive-days: '60'
+          issue-inactive-days: '90'
+          exclude-any-issue-labels: 'enhancement, pull request accepted'
+          pr-inactive-days: '60'
