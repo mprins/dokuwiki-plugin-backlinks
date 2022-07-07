@@ -9,10 +9,12 @@ jobs:
         
         strategy:
             matrix:
-                php-version: ['7.3', '7.4']
+                php-version: ['7.4']
                 dokuwiki-branch: [ 'master', 'stable']
                 include:
                   - php-version: '8.0'
+                    dokuwiki-branch: 'master'
+                  - php-version: '8.1'
                     dokuwiki-branch: 'master'
             fail-fast: false
 
