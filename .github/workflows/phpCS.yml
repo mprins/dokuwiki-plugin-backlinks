@@ -1,0 +1,30 @@
+name: PHP Code Style
+
+on: [push]
+
+jobs:
+    phpcs:
+        name: PHP CodeSniffer
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: '7.4'
+                tools: cs2pr, phpcs
+
+            - name: retrieve script
+              run: wget https://raw.github.com/splitbrain/dokuwiki-travis/master/travis.sh
+
+            - name: Install DokuWiki
+              env:
+                  CI_SERVER: 1
+                  DOKUWIKI : master
+              run: sh travis.sh
+
+#            - name: run PHP codesniffer
+#              run: php phpcs -v --runtime-set ignore_warnings_on_exit true --standard=_test/phpcs.xml lib/plugins/backlinks
+            - name: run PHP codesniffer
+              run: phpcs -q --standard=_test/phpcs_MigrationAdjustments.xml --report=checkstyle --runtime-set ignore_warnings_on_exit lib/plugins/backlinks | cs2pr

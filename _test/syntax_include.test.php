@@ -28,7 +28,7 @@ class syntax_include_plugin_backlinks_test extends DokuWikiTest {
     /**
      * copy data.
      */
-    public static function setUpBeforeClass(){
+    public static function setUpBeforeClass(): void {
         parent::setUpBeforeClass();
         global $conf;
         $conf['allowdebug'] = 1;
@@ -38,12 +38,12 @@ class syntax_include_plugin_backlinks_test extends DokuWikiTest {
         dbglog("\nset up class syntax_plugin_backlinks_test");
     }
 
-    function setUp() {
+    public function setUp(): void {
         parent::setUp();
 
         global $conf;
         $conf['allowdebug'] = 1;
-        $conf['cachetime'] = -1;
+        $conf['cachetime']  = -1;
 
         $data = array();
         search($data, $conf['datadir'], 'search_allpages', array('skipacl' => true));
@@ -51,31 +51,31 @@ class syntax_include_plugin_backlinks_test extends DokuWikiTest {
         //dbglog($data, "pages for indexing");
 
         $verbose = false;
-        $force = false;
+        $force   = false;
         foreach($data as $val) {
             idx_addPage($val['id'], $verbose, $force);
         }
 
         if($conf['allowdebug']) {
-            touch(DOKU_TMP_DATA.'cache/debug.log');
+            touch(DOKU_TMP_DATA . 'cache/debug.log');
         }
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         parent::tearDown();
 
         global $conf;
         // try to get the debug log after running the test, print and clear
         if($conf['allowdebug']) {
             print "\n";
-            readfile(DOKU_TMP_DATA.'cache/debug.log');
-            unlink(DOKU_TMP_DATA.'cache/debug.log');
+            readfile(DOKU_TMP_DATA . 'cache/debug.log');
+            unlink(DOKU_TMP_DATA . 'cache/debug.log');
         }
     }
 
-    public function testInclude() {
-        $request = new TestRequest();
-        $response = $request->get(array('id'=>'backlinks_include_syntax'), '/doku.php');
+    public function testInclude(): void {
+        $request  = new TestRequest();
+        $response = $request->get(array('id' => 'backlinks_include_syntax'), '/doku.php');
 
         $this->assertTrue(
             strpos($response->getContent(), 'Backlinks to what Bob Ross says (including only)') !== false,
@@ -85,25 +85,25 @@ class syntax_include_plugin_backlinks_test extends DokuWikiTest {
         $doc = phpQuery::newDocument($response->getContent());
         // look for id="plugin__backlinks"
         $this->assertEquals(
-                            1,
-                            pq('#plugin__backlinks', $doc)->length,
-                            'There should be one backlinks element'
-                           );
+            1,
+            pq('#plugin__backlinks', $doc)->length,
+            'There should be one backlinks element'
+        );
 
         $wikilinks = pq('#plugin__backlinks ul li', $doc);
         dbglog($wikilinks->text(), 'found backlinks');
         $this->assertEquals(
-                            1,
-                            $wikilinks->contents()->length,
-                            'There should be 1 backlink'
-                           );
+            1,
+            $wikilinks->contents()->length,
+            'There should be 1 backlink'
+        );
 
-        $lastlink = pq('a:last',$wikilinks);
-        dbglog($lastlink->text(),"last backlink");
+        $lastlink = pq('a:last', $wikilinks);
+        dbglog($lastlink->text(), "last backlink");
         $this->assertEquals(
-                            $lastlink->text(),
-                            'An included link to Bob Ross',
-                            'The last backlink should be "An included link to Bob Ross"'
-                           );
+            $lastlink->text(),
+            'An included link to Bob Ross',
+            'The last backlink should be "An included link to Bob Ross"'
+        );
     }
 }

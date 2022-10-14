@@ -1,0 +1,17 @@
+name: 'Repository Maintainance'
+
+on:
+  schedule:
+    - cron: '13 3 * * 6'
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    name: 'Lock stale issues and PRs'
+    steps:
+      - uses: dessant/lock-threads@v2
+        with:
+          github-token: ${{ github.token }}
+          issue-lock-inactive-days: '90'
+          issue-exclude-labels: 'enhancement, pull request accepted'
+          pr-lock-inactive-days: '60'
