@@ -128,6 +128,7 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
                 $renderer->doc .= '<ul class="idx">';
 $i=0; $more=false;
                 foreach($backlinks as $backlink) {
+                    if(++$i > $this->getConf('number')) {$more=true;break;}
                     $name = p_get_metadata($backlink, 'title');
                     if(empty($name)) {
                         $name = $backlink;
