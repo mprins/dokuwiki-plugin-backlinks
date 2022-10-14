@@ -126,7 +126,7 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
             if(!empty($backlinks)) {
 
                 $renderer->doc .= '<ul class="idx">';
-
+$i=0; $more=false;
                 foreach($backlinks as $backlink) {
                     $name = p_get_metadata($backlink, 'title');
                     if(empty($name)) {
@@ -138,6 +138,10 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
                 }
 
                 $renderer->doc .= '</ul>' . "\n";
+                                if ($more) {
+                    $renderer->doc .= tpl_actionlink('backlink', '','',count($backlinks)-$i.$this->getLang('more'), true);
+                }
+                
             } else {
                 $renderer->doc .= "<strong>Plugin Backlinks: " . $lang['nothingfound'] . "</strong>" . "\n";
             }
