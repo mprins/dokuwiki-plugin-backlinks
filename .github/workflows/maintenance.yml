@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     name: 'Lock stale issues and PRs'
     steps:
-      - uses: dessant/lock-threads@v3
+      - uses: dessant/lock-threads@v4
         with:
           github-token: ${{ github.token }}
           issue-inactive-days: '90'
