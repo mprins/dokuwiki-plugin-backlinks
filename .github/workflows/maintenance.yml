@@ -1,6 +1,7 @@
 name: 'Repository Maintenance'
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: '13 3 * * 6'
 
