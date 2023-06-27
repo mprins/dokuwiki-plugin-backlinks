@@ -1,7 +1,7 @@
 base    backlinks
 author  Mark C. Prins
 email   mprins@users.sf.net
-date    2022-07-07
+date    3023-06-27
 name    Backlinks Plugin
 desc    Displays backlinks to a given page.
 url     https://www.dokuwiki.org/plugin:backlinks

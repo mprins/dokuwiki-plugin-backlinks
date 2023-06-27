@@ -1,0 +1,16 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "*.info.txt"
+
+jobs:
+  release:
+    name: Release
+    uses: mprins/.github/.github/workflows/DW-plugin-release.yml@main
+    secrets:
+      DOKUWIKI_USER: ${{ secrets.DOKUWIKI_USER }}
+      DOKUWIKI_PASS: ${{ secrets.DOKUWIKI_PASS }}
