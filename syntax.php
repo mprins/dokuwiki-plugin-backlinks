@@ -1,4 +1,7 @@
 <?php
+
+use dokuwiki\Extension\SyntaxPlugin;
+
 /**
  * DokuWiki Syntax Plugin Backlinks.
  *
@@ -13,12 +16,12 @@
  * @author  Michael Klier <chi@chimeric.de>
  * @author  Mark C. Prins <mprins@users.sf.net>
  */
-
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
  * need to inherit from this class.
  */
-class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
+class syntax_plugin_backlinks extends SyntaxPlugin
+{
     /**
      * Syntax Type.
      *
@@ -26,21 +29,24 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      *
      * @see DokuWiki_Syntax_Plugin::getType()
      */
-    public function getType() {
+    public function getType()
+    {
         return 'substition';
     }
 
     /**
      * @see DokuWiki_Syntax_Plugin::getPType()
      */
-    public function getPType() {
+    public function getPType()
+    {
         return 'block';
     }
 
     /**
      * @see Doku_Parser_Mode::getSort()
      */
-    public function getSort() {
+    public function getSort()
+    {
         return 304;
     }
 
@@ -49,7 +55,8 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      *
      * @see Doku_Parser_Mode::connectTo()
      */
-    public function connectTo($mode) {
+    public function connectTo($mode)
+    {
         $this->Lexer->addSpecialPattern('\{\{backlinks>.+?\}\}', $mode, 'plugin_backlinks');
     }
 
@@ -58,17 +65,18 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      *
      * @see DokuWiki_Syntax_Plugin::handle()
      */
-    public function handle($match, $state, $pos, Doku_Handler $handler) {
+    public function handle($match, $state, $pos, Doku_Handler $handler)
+    {
         // strip {{backlinks> from start and }} from end
         $match = substr($match, 12, -2);
 
         $includeNS = '';
-        if(strstr($match, "#")) {
+        if (strstr($match, "#")) {
             $includeNS = substr(strstr($match, "#", false), 1);
             $match     = strstr($match, "#", true);
         }
 
-        return (array($match, $includeNS));
+        return ([$match, $includeNS]);
     }
 
     /**
@@ -76,23 +84,24 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      *
      * @see DokuWiki_Syntax_Plugin::render()
      */
-    public function render($format, Doku_Renderer $renderer, $data) {
+    public function render($format, Doku_Renderer $renderer, $data)
+    {
         global $lang;
         global $INFO;
         global $ID;
 
         $id = $ID;
         // If it's a sidebar, get the original id.
-        if($INFO != null) {
+        if ($INFO != null) {
             $id = $INFO['id'];
         }
         $match = $data[0];
         $match = ($match == '.') ? $id : $match;
-        if(strstr($match, ".:")) {
+        if (strstr($match, ".:")) {
             resolve_pageid(getNS($id), $match, $exists);
         }
 
-        if($format == 'xhtml') {
+        if ($format == 'xhtml') {
             $renderer->info['cache'] = false;
 
             $backlinks = ft_backlinks($match);
@@ -102,34 +111,31 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
             $renderer->doc .= '<div id="plugin__backlinks">' . "\n";
 
             $filterNS = $data[1];
-            if(!empty($backlinks) && !empty($filterNS)) {
-                if(stripos($filterNS, "!", 0) === 0) {
+            if (!empty($backlinks) && !empty($filterNS)) {
+                if (stripos($filterNS, "!", 0) === 0) {
                     $filterNS = substr($filterNS, 1);
                     dbglog($filterNS, "backlinks: exluding all of namespace: $filterNS");
                     $backlinks = array_filter(
-                        $backlinks, function ($ns) use ($filterNS) {
-                        return stripos($ns, $filterNS, 0) !== 0;
-                    }
+                        $backlinks,
+                        static fn($ns) => stripos($ns, $filterNS, 0) !== 0
                     );
                 } else {
                     dbglog($filterNS, "backlinks: including namespace: $filterNS only");
                     $backlinks = array_filter(
-                        $backlinks, function ($ns) use ($filterNS) {
-                        return stripos($ns, $filterNS, 0) === 0;
-                    }
+                        $backlinks,
+                        static fn($ns) => stripos($ns, (string) $filterNS, 0) === 0
                     );
                 }
             }
 
             dbglog($backlinks, "backlinks: all backlinks to be rendered");
 
-            if(!empty($backlinks)) {
-
+            if (!empty($backlinks)) {
                 $renderer->doc .= '<ul class="idx">';
 
-                foreach($backlinks as $backlink) {
+                foreach ($backlinks as $backlink) {
                     $name = p_get_metadata($backlink, 'title');
-                    if(empty($name)) {
+                    if (empty($name)) {
                         $name = $backlink;
                     }
                     $renderer->doc .= '<li><div class="li">';
