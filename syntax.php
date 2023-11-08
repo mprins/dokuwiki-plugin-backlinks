@@ -76,7 +76,7 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
      *
      * @see DokuWiki_Syntax_Plugin::render()
      */
-    public function render($mode, Doku_Renderer $renderer, $data) {
+    public function render($format, Doku_Renderer $renderer, $data) {
         global $lang;
         global $INFO;
         global $ID;
@@ -92,7 +92,7 @@ class syntax_plugin_backlinks extends DokuWiki_Syntax_Plugin {
             resolve_pageid(getNS($id), $match, $exists);
         }
 
-        if($mode == 'xhtml') {
+        if($format == 'xhtml') {
             $renderer->info['cache'] = false;
 
             $backlinks = ft_backlinks($match);

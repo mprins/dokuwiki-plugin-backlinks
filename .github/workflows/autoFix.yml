@@ -1,0 +1,12 @@
+name: AutoFix
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+
+jobs:
+  release:
+    name: AutoFix
+    uses: mprins/.github/.github/workflows/autoFix.yml@main
