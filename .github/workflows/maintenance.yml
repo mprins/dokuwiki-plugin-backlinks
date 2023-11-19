@@ -6,25 +6,9 @@ on:
     - cron: '13 3 * * 6'
 
 jobs:
-  lock:
-    runs-on: ubuntu-latest
-    name: 'Lock stale issues and PRs'
-    steps:
-      - uses: dessant/lock-threads@v4
-        with:
-          github-token: ${{ github.token }}
-          issue-inactive-days: '90'
-          exclude-any-issue-labels: 'enhancement, pull request accepted'
-          pr-inactive-days: '60'
-
-  workflows:
-    runs-on: ubuntu-latest
-    name: Cleanup old workflow runs
-    steps:
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
-        with:
-          token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          retain_days: 45
-          keep_minimum_runs: 2
+  action:
+    name: 'Repository Maintenance'
+    uses: mprins/.github/.github/workflows/maintenance.yml@main
+    with:
+        issue-inactive-days: '90'
+        pr-inactive-days: '60'
