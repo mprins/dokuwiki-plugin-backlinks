@@ -71,12 +71,13 @@ class syntax_plugin_backlinks extends SyntaxPlugin
         $match = substr($match, 12, -2);
 
         $includeNS = '';
+        $excludeNS = '';
         if (strstr($match, "#")) {
-            $includeNS = substr(strstr($match, "#", false), 1);
+            [$includeNS, $excludeNS] = explode('!', substr(strstr($match, "#", false), 1).'!');
             $match     = strstr($match, "#", true);
         }
 
-        return ([$match, $includeNS]);
+        return ([$match, $includeNS, $excludeNS]);
     }
 
     /**
@@ -112,22 +113,23 @@ class syntax_plugin_backlinks extends SyntaxPlugin
 
             $filterNS = $data[1];
             if (!empty($backlinks) && !empty($filterNS)) {
-                if (stripos($filterNS, "!", 0) === 0) {
-                    $filterNS = substr($filterNS, 1);
-                    dbglog($filterNS, "backlinks: exluding all of namespace: $filterNS");
-                    $backlinks = array_filter(
-                        $backlinks,
-                        static fn($ns) => stripos($ns, $filterNS, 0) !== 0
-                    );
-                } else {
-                    dbglog($filterNS, "backlinks: including namespace: $filterNS only");
-                    $backlinks = array_filter(
-                        $backlinks,
-                        static fn($ns) => stripos($ns, (string) $filterNS, 0) === 0
-                    );
-                }
+                dbglog($filterNS, "backlinks: including namespace: $filterNS only");
+                $backlinks = array_filter(
+                    $backlinks,
+                    static fn($ns) => stripos($ns, (string) $filterNS, 0) === 0
+                );
             }
-
+            $excludeNS = $data[2];
+            if (!empty($backlinks) && !empty($excludeNS)) {
+                if ($excludeNS == '.')
+                    $excludeNS = cleanID(getID());
+                dbglog($filterNS, "backlinks: exluding all of namespace: $excludeNS");
+                $backlinks = array_filter(
+                    $backlinks,
+                    static fn($ns) => stripos($ns, $excludeNS, 0) !== 0
+                );
+            }
+            
             dbglog($backlinks, "backlinks: all backlinks to be rendered");
 
             if (!empty($backlinks)) {
