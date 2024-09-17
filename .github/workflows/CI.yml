@@ -1,46 +1,21 @@
-name: CI
+name: 'CI'
 
-on: [push, pull_request, workflow_dispatch]
+on: [ push, pull_request, workflow_dispatch ]
 
 jobs:
-    testLinux:
-        name: PHP Unit
-        runs-on: ubuntu-latest
-        
-        strategy:
-            matrix:
-                php-version: ['8.0', '8.1', '8.2']
-                dokuwiki-branch: [ 'master', 'stable']
-            fail-fast: false
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: [ '8.1', '8.2' ]
+        dokuwiki-branch: [ 'master', 'stable' ]
+        include:
+          - php-version: '8.0'
+            dokuwiki-branch: 'stable'
+          - php-version: '8.3'
+            dokuwiki-branch: 'master'
 
-        steps:
-            - uses: actions/checkout@v4
-
-            - name: Setup PHP
-              uses: shivammathur/setup-php@v2
-              with:
-                  php-version: ${{ matrix.php-version }}
-                  extensions: mbstring, intl, bz2
-
-            - name: Setup problem matchers
-              run: |
-                echo ::add-matcher::${{ runner.tool_cache }}/php.json
-                echo ::add-matcher::${{ runner.tool_cache }}/phpunit.json
-
-            - name: Download DokuWiki Test-setup
-              run: wget https://raw.github.com/splitbrain/dokuwiki-travis/master/travis.sh
-
-            - name: Install DokuWiki
-              env:
-                  CI_SERVER: 1
-                  DOKUWIKI: ${{ matrix.dokuwiki-branch }}
-              run: sh travis.sh
-
-            - name: Setup PHPUnit
-              run: |
-                  php _test/fetchphpunit.php
-                  ./_test/phpunit.phar --version
-
-            - name: Run PHPUnit
-              run: |
-                cd _test && PRESERVE_TMP=false ./phpunit.phar --stderr --verbose --debug --group plugin_backlinks
+    uses: mprins/.github/.github/workflows/test.yml@main
+    with:
+      php-version: "${{ matrix.php-version }}"
+      dokuwiki-branch: "${{ matrix.dokuwiki-branch }}"
