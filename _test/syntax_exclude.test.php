@@ -23,14 +23,16 @@ use dokuwiki\Logger;
  * @group plugin_backlinks
  * @group plugins
  */
-class syntax_exclude_plugin_backlinks_test extends DokuWikiTest {
+class syntax_exclude_plugin_backlinks_test extends DokuWikiTest
+{
 
     protected $pluginsEnabled = array('backlinks');
 
     /**
      * copy data.
      */
-    public static function setUpBeforeClass(): void {
+    public static function setUpBeforeClass(): void
+    {
         parent::setUpBeforeClass();
         global $conf;
         $conf['allowdebug'] = 1;
@@ -40,41 +42,44 @@ class syntax_exclude_plugin_backlinks_test extends DokuWikiTest {
         Logger::debug("set up class syntax_plugin_backlinks_test");
     }
 
-    function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
 
         global $conf;
         $conf['allowdebug'] = 1;
-        $conf['cachetime']  = -1;
+        $conf['cachetime'] = -1;
+        $verbose = false;
+        $force = false;
 
         $data = array();
         search($data, $conf['datadir'], 'search_allpages', array('skipacl' => true));
 
-        $verbose = false;
-        $force   = false;
-        foreach($data as $val) {
+        foreach ($data as $val) {
             idx_addPage($val['id'], $verbose, $force);
         }
 
-        if($conf['allowdebug']) {
+        if ($conf['allowdebug']) {
             touch(DOKU_TMP_DATA . 'cache/debug.log');
         }
     }
 
-    public function tearDown(): void {
+    public function tearDown(): void
+    {
         parent::tearDown();
 
         global $conf;
         // try to get the debug log after running the test, print and clear
-        if($conf['allowdebug']) {
+        if ($conf['allowdebug']) {
             print "\n";
             readfile(DOKU_TMP_DATA . 'cache/debug.log');
             unlink(DOKU_TMP_DATA . 'cache/debug.log');
         }
     }
 
-    public function testExclude(): void {
-        $request  = new TestRequest();
+    public function testExclude(): void
+    {
+        $request = new TestRequest();
         $response = $request->get(array('id' => 'backlinks_exclude_syntax'), '/doku.php');
 
         $this->assertTrue(
