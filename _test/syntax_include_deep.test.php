@@ -48,8 +48,6 @@ class syntax_include_deep_plugin_backlinks_test extends DokuWikiTest {
         $data = array();
         search($data, $conf['datadir'], 'search_allpages', array('skipacl' => true));
 
-        //dbglog($data, "pages for indexing");
-
         $verbose = false;
         $force   = false;
         foreach($data as $val) {

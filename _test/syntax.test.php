@@ -15,6 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+use dokuwiki\Logger;
+
 /**
  * Syntax tests for the backlinks plugin.
  *
@@ -35,7 +37,7 @@ class syntax_plugin_backlinks_test extends DokuWikiTest {
 
         TestUtils::rcopy(TMP_DIR, dirname(__FILE__) . '/data/');
 
-        dbglog("\nset up class syntax_plugin_backlinks_test");
+        Logger::debug("set up class syntax_plugin_backlinks_test");
     }
 
     function setUp(): void {
@@ -47,8 +49,6 @@ class syntax_plugin_backlinks_test extends DokuWikiTest {
 
         $data = array();
         search($data, $conf['datadir'], 'search_allpages', array('skipacl' => true));
-
-        //dbglog($data, "pages for indexing");
 
         $verbose = false;
         $force   = false;
@@ -132,7 +132,7 @@ class syntax_plugin_backlinks_test extends DokuWikiTest {
         );
 
         $wikilinks = pq('#plugin__backlinks ul li', $doc);
-        dbglog($wikilinks->text(), 'found backlinks');
+        Logger::debug('found backlinks', $wikilinks->text());
         $this->assertEquals(
             4,
             $wikilinks->contents()->length,
@@ -140,10 +140,10 @@ class syntax_plugin_backlinks_test extends DokuWikiTest {
         );
 
         $lastlink = pq('a:last', $wikilinks);
-        dbglog($lastlink->text(), "last backlink");
+        Logger::debug("last backlink", $lastlink->text());
         $this->assertEquals(
-            $lastlink->text(),
             'A link to Bob Ross',
+            $lastlink->text(),
             'The last backlink should be a link to Bob Ross'
         );
     }
