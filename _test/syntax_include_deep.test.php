@@ -15,20 +15,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+use dokuwiki\Logger;
+
 /**
  * Syntax tests for the backlinks plugin.
  *
  * @group plugin_backlinks
  * @group plugins
  */
-class syntax_include_deep_plugin_backlinks_test extends DokuWikiTest {
+class syntax_include_deep_plugin_backlinks_test extends DokuWikiTest
+{
 
     protected $pluginsEnabled = array('backlinks');
 
     /**
      * copy data.
      */
-    public static function setUpBeforeClass(): void {
+    public static function setUpBeforeClass(): void
+    {
         parent::setUpBeforeClass();
         global $conf;
         $conf['allowdebug'] = 1;
@@ -38,52 +42,53 @@ class syntax_include_deep_plugin_backlinks_test extends DokuWikiTest {
         dbglog("\nset up class syntax_plugin_backlinks_test");
     }
 
-    function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
 
         global $conf;
         $conf['allowdebug'] = 1;
-        $conf['cachetime']  = -1;
+        $conf['cachetime'] = -1;
+        $verbose = false;
+        $force = false;
 
         $data = array();
         search($data, $conf['datadir'], 'search_allpages', array('skipacl' => true));
 
-        //dbglog($data, "pages for indexing");
-
-        $verbose = false;
-        $force   = false;
-        foreach($data as $val) {
+        foreach ($data as $val) {
             idx_addPage($val['id'], $verbose, $force);
         }
 
-        if($conf['allowdebug']) {
+        if ($conf['allowdebug']) {
             touch(DOKU_TMP_DATA . 'cache/debug.log');
         }
     }
 
-    public function tearDown(): void {
+    public function tearDown(): void
+    {
         parent::tearDown();
 
         global $conf;
         // try to get the debug log after running the test, print and clear
-        if($conf['allowdebug']) {
+        if ($conf['allowdebug']) {
             print "\n";
             readfile(DOKU_TMP_DATA . 'cache/debug.log');
             unlink(DOKU_TMP_DATA . 'cache/debug.log');
         }
     }
 
-    public function testInclude(): void {
-        $request  = new TestRequest();
-        $response = $request->get(array('id' => 'mmm:nnn:ooo:start'), '/doku.php');
+    public function testInclude(): void
+    {
+        $request = new TestRequest();
+        $response = $request->get(array('id' => 'mmm:nnn:ooo:start'));
 
         $this->assertTrue(
-            strpos($response->getContent(), 'Backlinks from pages in /aaa/bbb/cc/') !== false,
+            str_contains($response->getContent(), 'Backlinks from pages in /aaa/bbb/cc/'),
             '"Backlinks from pages in /aaa/bbb/cc/" was not in the output'
         );
 
         $this->assertFalse(
-            strpos($response->getContent(), 'linking to a page form aaa') !== false,
+            str_contains($response->getContent(), 'linking to a page form aaa'),
             '"linking to a page form aaa" should not be in the output'
         );
 
@@ -96,7 +101,7 @@ class syntax_include_deep_plugin_backlinks_test extends DokuWikiTest {
         );
 
         $wikilinks = pq('#plugin__backlinks ul li', $doc);
-        dbglog($wikilinks->text(), 'found backlinks');
+        Logger::debug('found backlinks', $wikilinks->text());
         $this->assertEquals(
             5,
             $wikilinks->contents()->length,
@@ -104,10 +109,10 @@ class syntax_include_deep_plugin_backlinks_test extends DokuWikiTest {
         );
 
         $lastlink = pq('a:last', $wikilinks);
-        dbglog($lastlink->text(), "last backlink");
+        Logger::debug("last backlink", $lastlink->text());
         $this->assertEquals(
-            $lastlink->text(),
             'linking to a namespace',
+            $lastlink->text(),
             'The last backlink should be "linking to a namespace"'
         );
     }

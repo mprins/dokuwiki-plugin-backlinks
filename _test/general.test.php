@@ -21,14 +21,16 @@
  * @group plugin_backlinks
  * @group plugins
  */
-class general_plugin_backlinks_test extends DokuWikiTest {
+class general_plugin_backlinks_test extends DokuWikiTest
+{
 
     protected $pluginsEnabled = array('backlinks');
 
     /**
      * Simple test to make sure the plugin.info.txt is in correct format
      */
-    public function test_plugininfo(): void {
+    public function testPluginInfo(): void
+    {
         $file = __DIR__ . '/../plugin.info.txt';
         $this->assertFileExists($file);
 
@@ -43,19 +45,22 @@ class general_plugin_backlinks_test extends DokuWikiTest {
         $this->assertArrayHasKey('url', $info);
 
         $this->assertEquals('backlinks', $info['base']);
-        $this->assertRegExp('/^https?:\/\//', $info['url']);
+        $this->assertMatchesRegularExpression('/^https?:\/\//', $info['url']);
         $this->assertTrue(mail_isvalid($info['email']));
-        $this->assertRegExp('/^\d\d\d\d-\d\d-\d\d$/', $info['date']);
+        $this->assertMatchesRegularExpression('/^\d\d\d\d-\d\d-\d\d$/', $info['date']);
         $this->assertTrue(false !== strtotime($info['date']));
     }
 
     /**
      * test if plugin is loaded.
      */
-    public function test_plugin_backlinks_isloaded(): void {
+    public function testPluginBacklinksIsLoaded(): void
+    {
         global $plugin_controller;
         $this->assertContains(
-            'backlinks', $plugin_controller->getList(), "backlinks plugin is loaded"
+            'backlinks',
+            $plugin_controller->getList(),
+            "backlinks plugin is loaded"
         );
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use dokuwiki\Extension\SyntaxPlugin;
+use dokuwiki\Logger;
 
 /**
  * DokuWiki Syntax Plugin Backlinks.
@@ -16,6 +17,7 @@ use dokuwiki\Extension\SyntaxPlugin;
  * @author  Michael Klier <chi@chimeric.de>
  * @author  Mark C. Prins <mprins@users.sf.net>
  */
+
 /**
  * All DokuWiki plugins to extend the parser/rendering mechanism
  * need to inherit from this class.
@@ -29,7 +31,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
      *
      * @see DokuWiki_Syntax_Plugin::getType()
      */
-    public function getType()
+    public function getType(): string
     {
         return 'substition';
     }
@@ -37,7 +39,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
     /**
      * @see DokuWiki_Syntax_Plugin::getPType()
      */
-    public function getPType()
+    public function getPType(): string
     {
         return 'block';
     }
@@ -45,7 +47,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
     /**
      * @see Doku_Parser_Mode::getSort()
      */
-    public function getSort()
+    public function getSort(): int
     {
         return 304;
     }
@@ -55,7 +57,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
      *
      * @see Doku_Parser_Mode::connectTo()
      */
-    public function connectTo($mode)
+    public function connectTo($mode): void
     {
         $this->Lexer->addSpecialPattern('\{\{backlinks>.+?\}\}', $mode, 'plugin_backlinks');
     }
@@ -65,7 +67,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
      *
      * @see DokuWiki_Syntax_Plugin::handle()
      */
-    public function handle($match, $state, $pos, Doku_Handler $handler)
+    public function handle($match, $state, $pos, Doku_Handler $handler): array
     {
         // strip {{backlinks> from start and }} from end
         $match = substr($match, 12, -2);
@@ -84,7 +86,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
      *
      * @see DokuWiki_Syntax_Plugin::render()
      */
-    public function render($format, Doku_Renderer $renderer, $data)
+    public function render($format, Doku_Renderer $renderer, $data): bool
     {
         global $lang;
         global $INFO;
@@ -106,7 +108,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
 
             $backlinks = ft_backlinks($match);
 
-            dbglog($backlinks, "backlinks: all backlinks to: $match");
+            Logger::debug("backlinks: all backlinks to: $match", $backlinks);
 
             $renderer->doc .= '<div id="plugin__backlinks">' . "\n";
 
@@ -114,13 +116,13 @@ class syntax_plugin_backlinks extends SyntaxPlugin
             if (!empty($backlinks) && !empty($filterNS)) {
                 if (stripos($filterNS, "!", 0) === 0) {
                     $filterNS = substr($filterNS, 1);
-                    dbglog($filterNS, "backlinks: exluding all of namespace: $filterNS");
+                    Logger::debug("backlinks: excluding all of namespace: $filterNS");
                     $backlinks = array_filter(
                         $backlinks,
                         static fn($ns) => stripos($ns, $filterNS, 0) !== 0
                     );
                 } else {
-                    dbglog($filterNS, "backlinks: including namespace: $filterNS only");
+                    Logger::debug("backlinks: including namespace: $filterNS only");
                     $backlinks = array_filter(
                         $backlinks,
                         static fn($ns) => stripos($ns, (string) $filterNS, 0) === 0
@@ -128,7 +130,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
                 }
             }
 
-            dbglog($backlinks, "backlinks: all backlinks to be rendered");
+            Logger::debug("backlinks: all backlinks to be rendered", $backlinks);
 
             if (!empty($backlinks)) {
                 $renderer->doc .= '<ul class="idx">';

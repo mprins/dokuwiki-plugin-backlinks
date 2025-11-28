@@ -15,66 +15,71 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+use dokuwiki\Logger;
+
 /**
  * Syntax tests for the backlinks plugin.
  *
  * @group plugin_backlinks
  * @group plugins
  */
-class syntax_exclude_plugin_backlinks_test extends DokuWikiTest {
+class syntax_exclude_plugin_backlinks_test extends DokuWikiTest
+{
 
     protected $pluginsEnabled = array('backlinks');
 
     /**
      * copy data.
      */
-    public static function setUpBeforeClass(): void {
+    public static function setUpBeforeClass(): void
+    {
         parent::setUpBeforeClass();
         global $conf;
         $conf['allowdebug'] = 1;
 
         TestUtils::rcopy(TMP_DIR, dirname(__FILE__) . '/data/');
 
-        dbglog("\nset up class syntax_plugin_backlinks_test");
+        Logger::debug("set up class syntax_plugin_backlinks_test");
     }
 
-    function setUp(): void {
+    public function setUp(): void
+    {
         parent::setUp();
 
         global $conf;
         $conf['allowdebug'] = 1;
-        $conf['cachetime']  = -1;
+        $conf['cachetime'] = -1;
+        $verbose = false;
+        $force = false;
 
         $data = array();
         search($data, $conf['datadir'], 'search_allpages', array('skipacl' => true));
 
-        //dbglog($data, "pages for indexing");
-
-        $verbose = false;
-        $force   = false;
-        foreach($data as $val) {
+        foreach ($data as $val) {
             idx_addPage($val['id'], $verbose, $force);
         }
 
-        if($conf['allowdebug']) {
+        if ($conf['allowdebug']) {
             touch(DOKU_TMP_DATA . 'cache/debug.log');
         }
     }
 
-    public function tearDown(): void {
+    public function tearDown(): void
+    {
         parent::tearDown();
 
         global $conf;
         // try to get the debug log after running the test, print and clear
-        if($conf['allowdebug']) {
+        if ($conf['allowdebug']) {
             print "\n";
             readfile(DOKU_TMP_DATA . 'cache/debug.log');
             unlink(DOKU_TMP_DATA . 'cache/debug.log');
         }
     }
 
-    public function testExclude(): void {
-        $request  = new TestRequest();
+    public function testExclude(): void
+    {
+        $request = new TestRequest();
         $response = $request->get(array('id' => 'backlinks_exclude_syntax'), '/doku.php');
 
         $this->assertTrue(
@@ -96,7 +101,7 @@ class syntax_exclude_plugin_backlinks_test extends DokuWikiTest {
         );
 
         $wikilinks = pq('#plugin__backlinks ul li', $doc);
-        dbglog($wikilinks->text(), 'found backlinks');
+        Logger::debug('found backlinks', $wikilinks->text());
         $this->assertEquals(
             3,
             $wikilinks->contents()->length,
@@ -104,7 +109,7 @@ class syntax_exclude_plugin_backlinks_test extends DokuWikiTest {
         );
 
         $lastlink = pq('a:last', $wikilinks);
-        dbglog($lastlink->text(), "last backlink");
+        Logger::debug("last backlink", $lastlink->text());
         $this->assertEquals(
             'A link to Bob Ross',
             $lastlink->text(),
