@@ -1,5 +1,6 @@
 <?php
 
+use dokuwiki\Parsing\Handler;
 use dokuwiki\Extension\SyntaxPlugin;
 use dokuwiki\Logger;
 
@@ -67,7 +68,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
      *
      * @see DokuWiki_Syntax_Plugin::handle()
      */
-    public function handle($match, $state, $pos, Doku_Handler $handler): array
+    public function handle($match, $state, $pos, Handler $handler): array
     {
         // strip {{backlinks> from start and }} from end
         $match = substr($match, 12, -2);
