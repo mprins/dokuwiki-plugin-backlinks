@@ -5,18 +5,18 @@ on: [push, workflow_dispatch]
 jobs:
     phpcs:
         name: PHP CodeSniffer
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-slim
         steps:
             - uses: actions/checkout@v7
 
             - name: Setup PHP
               uses: shivammathur/setup-php@v2
               with:
-                php-version: '8.2'
-                tools: cs2pr, phpcs
+                php-version: '8.3'
+                tools: cs2pr,phpcs,composer
 
             - name: retrieve script
-              run: wget https://raw.github.com/splitbrain/dokuwiki-travis/master/travis.sh
+              run: wget https://raw.githubusercontent.com/splitbrain/dokuwiki-travis/master/travis.sh
 
             - name: Install DokuWiki
               env:
@@ -26,5 +26,11 @@ jobs:
 
 #            - name: run PHP codesniffer
 #              run: php phpcs -v --runtime-set ignore_warnings_on_exit true --standard=_test/phpcs.xml lib/plugins/backlinks
+#            - name: run PHP codesniffer
+#              run: phpcs --standard=_test/phpcs.xml --standard=_test/phpcs_MigrationAdjustments.xml --report=checkstyle --runtime-set ignore_warnings_on_exit ./lib/plugins/backlinks | cs2pr
+
             - name: run PHP codesniffer
-              run: phpcs -q --standard=_test/phpcs_MigrationAdjustments.xml --report=checkstyle --runtime-set ignore_warnings_on_exit lib/plugins/backlinks | cs2pr
+              run: |
+                cd _test
+                composer install --no-interaction --no-progress --no-suggest --prefer-dist
+                phpcs --standard=./phpcs.xml,./phpcs_MigrationAdjustments.xml --report=checkstyle --runtime-set ignore_warnings_on_exit ../lib/plugins/backlinks | cs2pr

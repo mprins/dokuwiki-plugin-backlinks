@@ -2,7 +2,9 @@
 
 use dokuwiki\Parsing\Handler;
 use dokuwiki\Extension\SyntaxPlugin;
+use dokuwiki\File\PageResolver;
 use dokuwiki\Logger;
+use dokuwiki\Search\MetadataSearch;
 
 /**
  * DokuWiki Syntax Plugin Backlinks.
@@ -74,8 +76,8 @@ class syntax_plugin_backlinks extends SyntaxPlugin
         $match = substr($match, 12, -2);
 
         $includeNS = '';
-        if (strstr($match, "#")) {
-            $includeNS = substr(strstr($match, "#", false), 1);
+        if (str_contains($match, "#")) {
+            $includeNS = substr(strstr($match, "#"), 1);
             $match     = strstr($match, "#", true);
         }
 
@@ -100,14 +102,15 @@ class syntax_plugin_backlinks extends SyntaxPlugin
         }
         $match = $data[0];
         $match = ($match == '.') ? $id : $match;
-        if (strstr($match, ".:")) {
-            resolve_pageid(getNS($id), $match, $exists);
+        if (str_contains($match, ".:")) {
+            $resolver = new PageResolver($id);
+            $match = $resolver->resolveId($match);
         }
 
         if ($format == 'xhtml') {
             $renderer->info['cache'] = false;
 
-            $backlinks = ft_backlinks($match);
+            $backlinks = (new MetadataSearch())->backlinks($match);
 
             Logger::debug("backlinks: all backlinks to: $match", $backlinks);
 
@@ -115,18 +118,18 @@ class syntax_plugin_backlinks extends SyntaxPlugin
 
             $filterNS = $data[1];
             if (!empty($backlinks) && !empty($filterNS)) {
-                if (stripos($filterNS, "!", 0) === 0) {
+                if (stripos($filterNS, "!") === 0) {
                     $filterNS = substr($filterNS, 1);
                     Logger::debug("backlinks: excluding all of namespace: $filterNS");
                     $backlinks = array_filter(
                         $backlinks,
-                        static fn($ns) => stripos($ns, $filterNS, 0) !== 0
+                        static fn($ns) => stripos($ns, $filterNS) !== 0
                     );
                 } else {
                     Logger::debug("backlinks: including namespace: $filterNS only");
                     $backlinks = array_filter(
                         $backlinks,
-                        static fn($ns) => stripos($ns, (string) $filterNS, 0) === 0
+                        static fn($ns) => stripos($ns, (string) $filterNS) === 0
                     );
                 }
             }
