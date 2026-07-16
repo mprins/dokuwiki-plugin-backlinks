@@ -117,7 +117,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
             $renderer->doc .= '<div id="plugin__backlinks">' . "\n";
 
             $filterNS = $data[1];
-            if (!empty($backlinks) && !empty($filterNS)) {
+            if ($backlinks !== [] && !empty($filterNS)) {
                 if (stripos($filterNS, "!") === 0) {
                     $filterNS = substr($filterNS, 1);
                     Logger::debug("backlinks: excluding all of namespace: $filterNS");
@@ -136,7 +136,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
 
             Logger::debug("backlinks: all backlinks to be rendered", $backlinks);
 
-            if (!empty($backlinks)) {
+            if ($backlinks !== []) {
                 $renderer->doc .= '<ul class="idx">';
 
                 foreach ($backlinks as $backlink) {
