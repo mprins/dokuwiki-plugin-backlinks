@@ -16,6 +16,7 @@
  */
 
 use dokuwiki\Logger;
+use dokuwiki\Search\Indexer;
 
 /**
  * Syntax tests for the backlinks plugin.
@@ -56,7 +57,7 @@ class syntax_exclude_plugin_backlinks_test extends DokuWikiTest
         search($data, $conf['datadir'], 'search_allpages', array('skipacl' => true));
 
         foreach ($data as $val) {
-            idx_addPage($val['id'], $verbose, $force);
+            (new Indexer())->addPage($val['id'], $verbose, $force);
         }
 
         if ($conf['allowdebug']) {
@@ -83,7 +84,7 @@ class syntax_exclude_plugin_backlinks_test extends DokuWikiTest
         $response = $request->get(array('id' => 'backlinks_exclude_syntax'), '/doku.php');
 
         $this->assertTrue(
-            strpos($response->getContent(), 'Backlinks to what Bob Ross says (excluding exclude namespace)') !== false,
+            str_contains($response->getContent(), 'Backlinks to what Bob Ross says (excluding exclude namespace)'),
             '"Backlinks to what Bob Ross says (excluding exclude namespace)" was not in the output'
         );
 
@@ -92,7 +93,7 @@ class syntax_exclude_plugin_backlinks_test extends DokuWikiTest
             '"An excluded link to Bob Ross" should not be in the output'
         );
 
-        $doc = phpQuery::newDocument($response->getContent());
+        $doc = (new DOMWrap\Document())->loadHTML($response->getContent());
         // look for id="plugin__backlinks"
         $this->assertEquals(
             1,

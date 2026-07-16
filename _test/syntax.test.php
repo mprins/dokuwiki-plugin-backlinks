@@ -56,11 +56,9 @@ class syntax_plugin_backlinks_test extends DokuWikiTest
         search($data, $conf['datadir'], 'search_allpages', array('skipacl' => true));
 
         foreach ($data as $val) {
-            idx_addPage($val['id'], $verbose, $force);
+            (new Indexer())->addPage($val['id'], $verbose, $force);
         }
-        //idx_addPage('bob_ross_says', $verbose, $force);
-        //idx_addPage('link', $verbose, $force);
-        //idx_addPage('backlinks_syntax', $verbose, $force);
+
         if ($conf['allowdebug']) {
             touch(DOKU_TMP_DATA . 'cache/debug.log');
         }
@@ -131,7 +129,7 @@ class syntax_plugin_backlinks_test extends DokuWikiTest
             '"Backlinks to what Bob Ross says" was not in the output'
         );
 
-        $doc = phpQuery::newDocument($response->getContent());
+        $doc = (new DOMWrap\Document())->loadHTML($response->getContent());
         // look for id="plugin__backlinks"
         $this->assertEquals(
             1,

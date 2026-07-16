@@ -16,6 +16,8 @@
  */
 
 use dokuwiki\Logger;
+use dokuwiki\Search\Indexer;
+use DOMWrap\Document;
 
 /**
  * Syntax tests for the backlinks plugin.
@@ -56,7 +58,7 @@ class syntax_include_deep_plugin_backlinks_test extends DokuWikiTest
         search($data, $conf['datadir'], 'search_allpages', array('skipacl' => true));
 
         foreach ($data as $val) {
-            idx_addPage($val['id'], $verbose, $force);
+            (new Indexer())->addPage($val['id'], $verbose, $force);
         }
 
         if ($conf['allowdebug']) {
@@ -92,7 +94,7 @@ class syntax_include_deep_plugin_backlinks_test extends DokuWikiTest
             '"linking to a page form aaa" should not be in the output'
         );
 
-        $doc = phpQuery::newDocument($response->getContent());
+        $doc = (new DOMWrap\Document())->loadHTML($response->getContent());
         // look for id="plugin__backlinks"
         $this->assertEquals(
             1,

@@ -15,6 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+use dokuwiki\MailUtils;
+
 /**
  * General tests for the backlinks plugin
  *
@@ -46,7 +48,7 @@ class general_plugin_backlinks_test extends DokuWikiTest
 
         $this->assertEquals('backlinks', $info['base']);
         $this->assertMatchesRegularExpression('/^https?:\/\//', $info['url']);
-        $this->assertTrue(mail_isvalid($info['email']));
+        $this->assertTrue(MailUtils::isValid($info['email']));
         $this->assertMatchesRegularExpression('/^\d\d\d\d-\d\d-\d\d$/', $info['date']);
         $this->assertTrue(false !== strtotime($info['date']));
     }
