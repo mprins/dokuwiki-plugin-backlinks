@@ -88,23 +88,23 @@ class syntax_include_plugin_backlinks_test extends DokuWikiTest
             '"Backlinks to what Bob Ross says (including only)" was not in the output'
         );
 
-        $doc = (new Document())->loadHTML($response->getContent());
+        $doc = (new Document())->html($response->getContent());
         // look for id="plugin__backlinks"
         $this->assertEquals(
             1,
-            pq('#plugin__backlinks', $doc)->length,
+            count($doc->find('#plugin__backlinks')->toArray()),
             'There should be one backlinks element'
         );
 
-        $wikilinks = pq('#plugin__backlinks ul li', $doc);
+        $wikilinks = $doc->find('#plugin__backlinks ul li');
         Logger::debug('found backlinks', $wikilinks->text());
         $this->assertEquals(
             1,
-            $wikilinks->contents()->length,
+            count($wikilinks->toArray()),
             'There should be 1 backlink'
         );
 
-        $lastlink = pq('a:last', $wikilinks);
+        $lastlink = $wikilinks->last();
         Logger::debug("last backlink", $lastlink->text());
         $this->assertEquals(
             'An included link to Bob Ross',
