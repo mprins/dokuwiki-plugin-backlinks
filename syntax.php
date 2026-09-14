@@ -140,7 +140,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
                     $backlinks,
                     static function ($ns) use ($includeNS) {
                         foreach ($includeNS as $filterNS) {
-                            if (stripos($ns, $filterNS) === 0) {
+                            if (stripos($ns, (string) $filterNS) === 0) {
                                 return true;
                             }
                         }
@@ -158,7 +158,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
                     $backlinks,
                     static function ($ns) use ($excludeNS) {
                         foreach ($excludeNS as $filterNS) {
-                            if (stripos($ns, $filterNS) === 0) {
+                            if (stripos($ns, (string) $filterNS) === 0) {
                                 return false;
                             }
                         }
