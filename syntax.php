@@ -11,10 +11,13 @@ use dokuwiki\Search\MetadataSearch;
  *
  * Shows a list of pages that link back to a given page.
  *
- * Syntax:  {{backlinks>[pagename][#filterNS][#!filterNS]...}}
+ * Syntax:  {{backlinks>[pagename][#filterNS][#!filterNS][|option1][|option2]}}
  *
  *   [pagename] - a valid wiki pagename or a . for the current page
- *   [filterNS] - a valid,absolute namespace name, optionally prepended with ! to exclude
+ *   [filterNS] - a valid, absolute namespace name, optionally prepended with ! to exclude
+ *   [option]   - optional display option:
+ *                context - show the text line containing the backlink
+ *                sorted  - sort context entries alphabetically
  *
  * @license GPL 2 (http://www.gnu.org/licenses/gpl.html)
  * @author  Michael Klier <chi@chimeric.de>
@@ -75,6 +78,12 @@ class syntax_plugin_backlinks extends SyntaxPlugin
         // strip {{backlinks> from start and }} from end
         $match = substr($match, 12, -2);
 
+        $options = [];
+        if (str_contains($match, "|")) {
+            $options = explode('|', substr(strstr($match, "|"), 1));
+            $match   = strstr($match, "|", true);
+        }
+
         $includeNS = [];
         $excludeNS = [];
 
@@ -94,7 +103,7 @@ class syntax_plugin_backlinks extends SyntaxPlugin
             }
         }
 
-        return ([$match, $includeNS, $excludeNS]);
+        return ([$match, $includeNS, $excludeNS, $options]);
     }
 
     /**
@@ -129,8 +138,13 @@ class syntax_plugin_backlinks extends SyntaxPlugin
 
             $renderer->doc .= '<div id="plugin__backlinks">' . "\n";
 
-            $includeNS = $data[1];
-            $excludeNS = $data[2];
+            // Defaults keep cached parser instructions from older plugin versions compatible.
+            $includeNS = $data[1] ?? [];
+            $excludeNS = $data[2] ?? [];
+            $options = $data[3] ?? [];
+
+            $displayContext = in_array('context', $options, true);
+            $sortLines = in_array('sorted', $options, true);
 
             // Include namespaces
             if ($backlinks !== [] && $includeNS !== []) {
@@ -173,14 +187,58 @@ class syntax_plugin_backlinks extends SyntaxPlugin
             if ($backlinks !== []) {
                 $renderer->doc .= '<ul class="idx">';
 
-                foreach ($backlinks as $backlink) {
-                    $name = p_get_metadata($backlink, 'title');
-                    if (empty($name)) {
-                        $name = $backlink;
+                if ($displayContext) {
+                    $outputLines = [];
+
+                    foreach ($backlinks as $backlink) {
+                        $name = p_get_metadata($backlink, 'title');
+                        if (empty($name)) {
+                            $name = $backlink;
+                        }
+
+                        $lines = p_wiki_xhtml($backlink);
+                        $test = explode(PHP_EOL, $lines);
+
+                        foreach ($test as $line) {
+                            if (strpos($line, ' data-wiki-id="' . $match . '"') !== false) {
+                                $line = preg_replace('/<br\/>$/', '', $line);
+                                $line = preg_replace(
+                                    '/<a.*?' . preg_quote($match, '/') . '.*?((<\/)\w+(>))/',
+                                    '',
+                                    $line
+                                );
+                                $line = preg_replace('/<li.*?(>)/', '', $line);
+                                $line = preg_replace('/<div.*?(>)/', '', $line);
+                                $line = preg_replace('/<\/div.*?(>)/', '', $line);
+
+                                $outputLines[] = '<li><div class="li">' . $line . ' - '
+                                    . html_wikilink(':' . $backlink, $name)
+                                    . '</div></li>' . "\n";
+                            }
+                        }
                     }
-                    $renderer->doc .= '<li><div class="li">';
-                    $renderer->doc .= html_wikilink(':' . $backlink, $name);
-                    $renderer->doc .= '</div></li>' . "\n";
+
+                    if ($sortLines) {
+                        sort($outputLines);
+                    }
+
+                    foreach ($outputLines as $line) {
+                        $renderer->doc .= $line;
+                    }
+                } else {
+                    if ($sortLines) {
+                        sort($backlinks);
+                    }
+                    foreach ($backlinks as $backlink) {
+                        $name = p_get_metadata($backlink, 'title');
+                        if (empty($name)) {
+                            $name = $backlink;
+                        }
+
+                        $renderer->doc .= '<li><div class="li">';
+                        $renderer->doc .= html_wikilink(':' . $backlink, $name);
+                        $renderer->doc .= '</div></li>' . "\n";
+                    }
                 }
 
                 $renderer->doc .= '</ul>' . "\n";
